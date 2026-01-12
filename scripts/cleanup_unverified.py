@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import asyncio
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, delete
