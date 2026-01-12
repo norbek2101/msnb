@@ -99,7 +99,7 @@ class AuthService:
                 detail="Invalid verification token"
             )
 
-        if verification_token.expires_at < datetime.now(timezone.utc):
+        if verification_token.expires_at < datetime.utcnow():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Verification token has expired"

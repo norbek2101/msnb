@@ -40,4 +40,4 @@ def generate_verification_token() -> str:
 
 
 def get_verification_token_expiry() -> datetime:
-    return datetime.now(timezone.utc) + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
+    return datetime.utcnow() + timedelta(hours=settings.VERIFICATION_TOKEN_EXPIRE_HOURS)
