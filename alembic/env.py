@@ -8,7 +8,7 @@ from alembic import context
 import sys
 import os
 
-from app.database import Base
+from app.models import Base
 from app import models
 
 # this is the Alembic Config object, which provides

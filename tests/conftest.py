@@ -33,6 +33,9 @@ async def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
+from app.core.limiter import limiter
+limiter.enabled = False
+
 
 @pytest_asyncio.fixture
 async def async_client():
