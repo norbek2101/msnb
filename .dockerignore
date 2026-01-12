@@ -1,0 +1,8 @@
+.venv
+.git
+__pycache__
+*.pyc
+.DS_Store
+alembic.ini
+!alembic.ini
+.pytest_cache/
