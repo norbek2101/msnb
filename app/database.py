@@ -1,9 +1,9 @@
-import os
+from app.core.config import settings
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 
 
-database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./social.db")
+database_url = settings.DATABASE_URL
 if database_url.startswith("postgresql://"):
     database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
@@ -15,5 +15,3 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
     autoflush=False,
 )
-
-Base = declarative_base()

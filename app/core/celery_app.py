@@ -1,13 +1,9 @@
-import os
+from app.core.config import settings
 from celery import Celery
 
 celery = Celery(
     "worker",
-    broker=os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0"),
-    backend=os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0"),
-    include=["app.tasks"]  
+    broker=settings.CELERY_BROKER_URL,
+    backend=settings.CELERY_RESULT_BACKEND,
+    include=["app.tasks"]
 )
-
-# celery.conf.task_routes = {
-#     "app.tasks.send_email_task": "main-queue"
-# }
