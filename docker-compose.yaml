@@ -3,12 +3,14 @@ services:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=secretpassword
-      - POSTGRES_DB=app_db
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-app_db}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d app_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}" ]
       interval: 5s
       timeout: 5s
       retries: 5
