@@ -1,6 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from app import models
 
 
@@ -46,11 +47,13 @@ class UserRepository:
         page: int = 1,
         page_size: int = 10
     ) -> tuple[list[models.User], int]:
-        count_result = await self.db.execute(select(models.User))
-        total = len(count_result.scalars().all())
+        count_query = select(func.count()).select_from(models.User)
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar() or 0
 
         result = await self.db.execute(
             select(models.User)
+            .options(selectinload(models.User.posts))
             .order_by(models.User.created_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)

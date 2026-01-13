@@ -2,6 +2,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from app import models
 
 
@@ -11,7 +12,13 @@ class PostRepository:
 
     async def get_by_id(self, post_id: UUID) -> models.Post | None:
         result = await self.db.execute(
-            select(models.Post).filter(models.Post.id == post_id)
+            select(models.Post)
+            .options(
+                selectinload(models.Post.author),
+                selectinload(models.Post.comments).selectinload(models.Comment.author),
+                selectinload(models.Post.likes)
+            )
+            .filter(models.Post.id == post_id)
         )
         return result.scalars().first()
 
@@ -23,7 +30,7 @@ class PostRepository:
         date_from: datetime | None = None,
         date_to: datetime | None = None
     ) -> tuple[list[models.Post], int]:
-        query = select(models.Post)
+        query = select(models.Post).options(selectinload(models.Post.author))
 
         if search:
             search_filter = f"%{search}%"
@@ -67,6 +74,8 @@ class PostRepository:
 
     async def get_posts_by_author(self, author_id: UUID) -> list[models.Post]:
         result = await self.db.execute(
-            select(models.Post).filter(models.Post.author_id == author_id)
+            select(models.Post)
+            .options(selectinload(models.Post.author))
+            .filter(models.Post.author_id == author_id)
         )
         return list(result.scalars().all())

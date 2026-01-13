@@ -1,6 +1,7 @@
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app import models
 
 
@@ -10,13 +11,16 @@ class CommentRepository:
 
     async def get_by_id(self, comment_id: UUID) -> models.Comment | None:
         result = await self.db.execute(
-            select(models.Comment).filter(models.Comment.id == comment_id)
+            select(models.Comment)
+            .options(selectinload(models.Comment.author))
+            .filter(models.Comment.id == comment_id)
         )
         return result.scalars().first()
 
     async def get_by_post_id(self, post_id: UUID) -> list[models.Comment]:
         result = await self.db.execute(
             select(models.Comment)
+            .options(selectinload(models.Comment.author))
             .filter(models.Comment.post_id == post_id)
             .order_by(models.Comment.created_at.asc())
         )
