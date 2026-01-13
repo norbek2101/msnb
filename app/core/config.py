@@ -1,21 +1,30 @@
 import os
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:secretpassword@db:5432/app_db"
-    SECRET_KEY: str = "my_super_secret_key_change_this_in_production"
+    # Database - no default, must be set in .env
+    DATABASE_URL: str
+    
+    # Security - no default, must be set in .env
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
     UNVERIFIED_USER_CLEANUP_HOURS: int = 48
 
+    # Celery / Redis
     CELERY_BROKER_URL: str = "redis://redis:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
 
-    MAIL_USERNAME: str = "user"
-    MAIL_PASSWORD: str = "password"
-    MAIL_FROM: str = "admin@example.com"
+    # Email - no defaults for sensitive fields
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_PORT: int = 587
 
