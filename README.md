@@ -199,11 +199,20 @@ msnb/
 ## Running Tests
 
 ```bash
-# Install test dependencies
-pip install pytest pytest-asyncio httpx
+# Run all tests
+uv run pytest tests/ -v
 
-# Run tests
-pytest tests/ -v
+# Run all tests (quiet mode)
+uv run pytest tests/ -q
+
+# Run a specific test file
+uv run pytest tests/test_auth.py -v
+
+# Run tests with short traceback
+uv run pytest tests/ -v --tb=short
+
+# Run a single test
+uv run pytest tests/test_auth.py::TestLogin::test_login_with_email_success -v
 ```
 
 ## Cleanup Script
