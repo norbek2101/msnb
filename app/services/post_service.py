@@ -19,7 +19,7 @@ class PostService:
         search: str | None = None,
         date_from: datetime | None = None,
         date_to: datetime | None = None
-    ) -> tuple[list[models.Post], int]:
+    ) -> tuple[list[dict], int]:
         return await self.post_repo.get_list(
             page=page,
             page_size=page_size,
@@ -29,13 +29,21 @@ class PostService:
         )
 
     async def get_post(self, post_id: UUID) -> models.Post:
-        post = await self.post_repo.get_by_id(post_id)
-        if not post:
+        # Note: This might fetch just the post without counts if the repo changes, 
+        # but for now get_by_id returns a dict. We need to handle that carefully.
+        # Actually, let's keep a method in repo for "just post" if implementation logic needs it,
+        # or extract it from the result.
+        # Looking at original code, get_post was used for internal logic (update/delete).
+        # We need to make sure we can still get the model object.
+        
+        # The repo.get_by_id now returns a dict or None.
+        result = await self.post_repo.get_by_id(post_id)
+        if not result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Post not found"
             )
-        return post
+        return result["post"]
 
     async def create_post(
         self,
@@ -82,12 +90,29 @@ class PostService:
         await self.post_repo.delete(post)
 
     async def get_post_with_details(self, post_id: UUID) -> dict:
-        post = await self.get_post(post_id)
-        likes = await self.like_repo.get_user_ids_by_post(post_id)
-
-        return {
-            "post": post,
-            "likes": likes,
-            "likes_count": len(likes),
-            "comments_count": len(post.comments) if post.comments else 0
-        }
+        result = await self.post_repo.get_by_id(post_id)
+        if not result:
+             raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Post not found"
+            )
+        
+        # We need 'likes' list for the detail view specifically?
+        # The original code returned "likes": likes (list of IDs).
+        # The optimization returns counts. 
+        # If the frontend needs the LIST of likes (e.g. to show avatars), we need that.
+        # But usually 'likes_count' is enough, and 'is_liked' (by me).
+        # Original router used `details["likes"]` in `get_post` router.
+        # Let's check `schemas.PostDetailResponse`.
+        
+        # We might need to fetch likes separately if the schema demands the list of likes.
+        # Yes, schema might demand it.
+        # The repo get_by_id now has count.
+        # We can fetch likes list if needed.
+        
+        likes_ids = await self.like_repo.get_user_ids_by_post(post_id)
+        
+        result["likes"] = likes_ids
+        # Ensure counts are correct (repo count should match len(likes_ids) usually, but repo count is faster)
+        
+        return result

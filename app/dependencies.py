@@ -114,3 +114,15 @@ def get_like_service(
     post_repo: PostRepository = Depends(get_post_repository)
 ) -> LikeService:
     return LikeService(like_repo, post_repo)
+
+
+from app.repositories.feed_repository import FeedRepository
+from app.services.feed_service import FeedService
+
+def get_feed_repository(db: AsyncSession = Depends(get_db)) -> FeedRepository:
+    return FeedRepository(db)
+
+def get_feed_service(
+    feed_repo: FeedRepository = Depends(get_feed_repository)
+) -> FeedService:
+    return FeedService(feed_repo)

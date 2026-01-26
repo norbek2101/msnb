@@ -27,7 +27,7 @@ async def list_posts(
     date_to: Optional[datetime] = Query(None),
     service: PostService = Depends(get_post_service)
 ):
-    posts, total = await service.get_posts(
+    results, total = await service.get_posts(
         page=page,
         page_size=page_size,
         search=search,
@@ -36,8 +36,9 @@ async def list_posts(
     )
 
     post_responses = []
-    for post in posts:
-        details = await service.get_post_with_details(post.id)
+    for item in results:
+        # item is a dict: {"post": Post, "likes_count": int, "comments_count": int}
+        post = item["post"]
         post_responses.append(schemas.PostResponse(
             id=post.id,
             author_id=post.author_id,
@@ -50,8 +51,8 @@ async def list_posts(
                 username=post.author.username,
                 full_name=post.author.full_name
             ) if post.author else None,
-            likes_count=details["likes_count"],
-            comments_count=details["comments_count"]
+            likes_count=item["likes_count"],
+            comments_count=item["comments_count"]
         ))
 
     pages = (total + page_size - 1) // page_size if total > 0 else 1
